@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"net"
+	"os"
+	"strconv"
 	"sync"
 
 	"tp2-grpc-devoir/services"
@@ -41,7 +45,7 @@ type Client struct {
 
 var (
 	clients        = make(map[string]Client)
-	maxConnections = 2 // Example maximum number of connections per client
+	maxConnections int // Example maximum number of connections per client
 	mutex          sync.Mutex
 )
 
@@ -78,6 +82,18 @@ func (s *server) Send(ctx context.Context, in *services.Number) (*services.Resul
 }
 
 func main() {
+	// Create a scanner to read from stdin
+	scanner := bufio.NewScanner(os.Stdin)
+	// Ask the user to enter a number
+	fmt.Print("Please enter the maximum of connections for each client : ")
+	if !scanner.Scan() {
+		log.Fatal("Failed to read user input")
+	}
+	maxConnStr := scanner.Text()
+
+	// Parse the user input as an integer
+	maxConn, _ := strconv.Atoi(maxConnStr)
+	maxConnections = maxConn
 
 	// Listen for incoming connections
 	lis, err := net.Listen("tcp", ":50051")
