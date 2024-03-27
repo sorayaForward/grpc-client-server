@@ -38,13 +38,8 @@ func prime(num int32) int32 {
 	return 1
 }
 
-type Client struct {
-	name        string
-	connections int
-}
-
 var (
-	clients        = make(map[string]Client)
+	clients        = make(map[string]int)
 	maxConnections int // Example maximum number of connections per client
 	mutex          sync.Mutex
 )
@@ -57,14 +52,14 @@ func (s *server) Send(ctx context.Context, in *services.Number) (*services.Resul
 	// Check if the client is already in the map
 	if client, ok := clients[clientName]; ok {
 		// Client already exists, decrement the number of connections
-		client.connections--
+		client--
 		clients[clientName] = client
-		if client.connections == 0 {
+		if client == 0 {
 			return &services.Result{Num: -2}, nil
 		}
 	} else {
 		// Client doesn't exist, add it to the map with connections initialized to max
-		clients[clientName] = Client{name: clientName, connections: maxConnections}
+		clients[clientName] = maxConnections
 	}
 	log.Println(clients)
 
